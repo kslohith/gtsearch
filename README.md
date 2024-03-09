@@ -1,8 +1,8 @@
-#tsearch
+# tsearch
 
 Georgia Tech specific web crawler using scrapy framework as the base.
 
-#Running Instructions
+## Running Instructions
 
 Install scrapy using pip
 
