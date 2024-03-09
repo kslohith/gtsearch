@@ -40,10 +40,17 @@ class TechSpider(scrapy.Spider):
             for link in links:
                 href = link.xpath('@href').extract_first()
                 if href is not None and "https" not in str(href):
-                     href = str(extract_hostname(response.url)) + href
+                     href = "https://" + str(extract_hostname(response.url)) + href
                 if href not in url_seen:
                      url_seen.add(href)
                      urls_frontier.append(href)
+            #Get a Valid url from url frontier
+            while len(urls_frontier) > 0 and urls_frontier[0] is None:
+                 urls_frontier.popleft()
+            try:
+                yield scrapy.Request(url=urls_frontier.popleft(), callback=self.parse, dont_filter=True)
+            except Exception as e:
+                    print(e)
             
 
             
