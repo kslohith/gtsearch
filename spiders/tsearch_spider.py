@@ -2,6 +2,7 @@ from pathlib import Path
 from collections import deque
 import scrapy
 from urllib.parse import urlparse
+from tsearch.spiders.embeddings.similarity_search_embeddings import get_similarity_scores
 
 def extract_hostname(url):
     parsed_url = urlparse(url)
@@ -16,30 +17,37 @@ class TechSpider(scrapy.Spider):
     def start_requests(self):
         urls = [
             "https://www.cc.gatech.edu/",
+            "https://library.gatech.edu/",
+            "https://pe.gatech.edu/degrees/computer-science",
+            "https://www.reddit.com/r/OMSCS/",
+            "https://www.reddit.com/r/gatech/",
+            "https://www.omscentral.com/",
+            "https://spp.gatech.edu/spp_newsletters",
+            "https://scs.gatech.edu/news",
+            "https://db.cc.gatech.edu/",
+            "https://coe.gatech.edu/"
         ]
         for url in urls:
             yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response):
+            text_content = ""
             p_tag_content = response.xpath('//p')
             for p_tag in p_tag_content:
                 p_text = p_tag.xpath('string()').get().strip()
+                text_content += p_text
                 yield{
                      "paragraph": p_text
                 }
-            h_tag_content = response.xpath('//h1 | //h2 | //h3 | //h4 | //h5 | //h6')
-            for heading_tag in h_tag_content:
-                heading_text = heading_tag.xpath('string()').get().strip()
-                yield{
-                     "header": heading_text
-                }
+            print(text_content)
+            print(get_similarity_scores(text_content))
             # TODO: Add vector embedding filter
             # here is where we will add our implementation of vector search to decide whether to crawl this page or not
             links = response.xpath('//a')
             # Loop through each link and extract the href attribute
             for link in links:
                 href = link.xpath('@href').extract_first()
-                if href is not None and "https" not in str(href):
+                if href is not None and ("https" not in href and "http" not in href):
                      href = "https://" + str(extract_hostname(response.url)) + href
                 if href not in url_seen:
                      url_seen.add(href)
@@ -48,9 +56,10 @@ class TechSpider(scrapy.Spider):
             while len(urls_frontier) > 0 and urls_frontier[0] is None:
                  urls_frontier.popleft()
             try:
+                print("*****Exploring url******", urls_frontier[0], len(url_seen))
                 yield scrapy.Request(url=urls_frontier.popleft(), callback=self.parse, dont_filter=True)
-            except Exception as e:
-                    print(e)
+            except:
+                pass
             
 
             
