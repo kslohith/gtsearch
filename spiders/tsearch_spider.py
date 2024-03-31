@@ -14,6 +14,9 @@ urls_frontier = deque()
 class TechSpider(scrapy.Spider):
     name = "tsearch"
 
+    def __init__(self):
+        self.number_parsed = 1
+
     def start_requests(self):
         urls = [
             "https://www.cc.gatech.edu/",
@@ -39,27 +42,25 @@ class TechSpider(scrapy.Spider):
                 yield{
                      "paragraph": p_text
                 }
-            print(text_content)
-            print(get_similarity_scores(text_content))
-            # TODO: Add vector embedding filter
-            # here is where we will add our implementation of vector search to decide whether to crawl this page or not
-            links = response.xpath('//a')
-            # Loop through each link and extract the href attribute
-            for link in links:
-                href = link.xpath('@href').extract_first()
-                if href is not None and ("https" not in href and "http" not in href):
-                     href = "https://" + str(extract_hostname(response.url)) + href
-                if href not in url_seen:
-                     url_seen.add(href)
-                     urls_frontier.append(href)
-            #Get a Valid url from url frontier
-            while len(urls_frontier) > 0 and urls_frontier[0] is None:
-                 urls_frontier.popleft()
-            try:
-                print("*****Exploring url******", urls_frontier[0], len(url_seen))
-                yield scrapy.Request(url=urls_frontier.popleft(), callback=self.parse, dont_filter=True)
-            except:
-                pass
+            if get_similarity_scores(text_content,response.url,self.number_parsed) > 0.4:
+                self.number_parsed += 1
+                links = response.xpath('//a')
+                # Loop through each link and extract the href attribute
+                for link in links:
+                    href = link.xpath('@href').extract_first()
+                    if href is not None and ("https" not in href and "http" not in href):
+                        href = "https://" + str(extract_hostname(response.url)) + href
+                    if href not in url_seen:
+                        url_seen.add(href)
+                        urls_frontier.append(href)
+                #Get a Valid url from url frontier
+                while len(urls_frontier) > 0 and urls_frontier[0] is None:
+                    urls_frontier.popleft()
+                try:
+                    print("*****Exploring url******", urls_frontier[0], len(url_seen))
+                    yield scrapy.Request(url=urls_frontier.popleft(), callback=self.parse, dont_filter=True)
+                except:
+                    pass
             
 
             
