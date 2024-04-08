@@ -17,12 +17,14 @@ index = pc.Index("tsearch")
 def ask_tsearch():
     search_query = request.json
     search_embedding = np.array(get_vector_embeddings(search_query["search_query"]))
-    results = index.query(vector=search_embedding.tolist()[0], top_k=2, include_metadata=True, namespace='ns1')
+    results = index.query(vector=search_embedding.tolist()[0], top_k=5, include_metadata=True, namespace='ns1')
     context = ""
+    link = []
     result_array = results.get('matches')
     for res in result_array:
         metadata = res.get('metadata')
         context += metadata.get('text')
+        link.append(metadata.get('url'))
 
     context.replace("\n", "")
 
@@ -30,7 +32,7 @@ def ask_tsearch():
         # This is the default and can be omitted
         api_key=os.environ.get("OPENAI_API_KEY"),
     )
-    query_message = f"using this as context {context} answer the following question {search_query['search_query']}"
+    query_message = f"using this as context {context} answer the following question {search_query['search_query']}, also use the below list of urls to give out any of these urls if it relevant to the question {link}. All questions are based on georgia tech."
     chat_completion = client.chat.completions.create(
         messages=[
             {
