@@ -17,7 +17,7 @@ index = pc.Index("tsearch")
 def ask_tsearch():
     search_query = request.json
     search_embedding = np.array(get_vector_embeddings(search_query["search_query"]))
-    results = index.query(vector=search_embedding.tolist()[0], top_k=5, include_metadata=True, namespace='ns1')
+    results = index.query(vector=search_embedding.tolist()[0], top_k=2, include_metadata=True, namespace='ns1')
     context = ""
     link = []
     result_array = results.get('matches')
