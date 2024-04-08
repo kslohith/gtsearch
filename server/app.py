@@ -12,10 +12,6 @@ app = Flask(__name__)
 pc = Pinecone(api_key=os.environ.get('pinecone_secret'))
 index = pc.Index("tsearch")
 
-@app.route('/', methods=['GET'])
-def ask_start():
-    return "Good to Go"
-
 # Route to add a new book
 @app.route('/tsearch/search', methods=['POST'])
 def ask_tsearch():
@@ -47,4 +43,4 @@ def ask_tsearch():
     return chat_completion.choices[0].message.content
     
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000)
