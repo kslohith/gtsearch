@@ -5,11 +5,11 @@ from embedding import get_vector_embeddings
 from openai import OpenAI
 import os
 
-os.environ['OPENAI_API_KEY'] = 'xxxxxx'
+os.environ['OPENAI_API_KEY'] = os.environ.get('openai_secret')
 
 app = Flask(__name__)
 
-pc = Pinecone(api_key="xxxxx")
+pc = Pinecone(api_key=os.environ.get('pinecone_secret'))
 index = pc.Index("tsearch")
 
 # Route to add a new book
