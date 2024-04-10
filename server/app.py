@@ -3,12 +3,13 @@ import numpy as np
 from pinecone import Pinecone, ServerlessSpec
 from embedding import get_vector_embeddings
 from openai import OpenAI
+from flask_cors import CORS
 import os
 
 os.environ['OPENAI_API_KEY'] = os.environ.get('openai_secret')
 
 app = Flask(__name__)
-
+CORS(app)
 pc = Pinecone(api_key=os.environ.get('pinecone_secret'))
 index = pc.Index("tsearch")
 
@@ -17,7 +18,7 @@ index = pc.Index("tsearch")
 def ask_tsearch():
     search_query = request.json
     search_embedding = np.array(get_vector_embeddings(search_query["search_query"]))
-    results = index.query(vector=search_embedding.tolist()[0], top_k=2, include_metadata=True, namespace='ns1')
+    results = index.query(vector=search_embedding.tolist()[0], top_k=5, include_metadata=True, namespace='ns1')
     context = ""
     link = []
     result_array = results.get('matches')

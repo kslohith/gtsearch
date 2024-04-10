@@ -72,3 +72,4 @@ urllib3==2.2.1
 w3lib==2.1.2
 Werkzeug==3.0.1
 zope.interface==6.2
+flask_cors
