@@ -20,7 +20,7 @@ Install scrapy using pip
 ```shell
 pip install scrapy
 ```
-To run a crawl and save results to a file named search.json
+To run a crawl and insert relevant documents into pinecone
 
 ```python
 scrapy crawl tsearch -o search.json
